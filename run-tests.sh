@@ -25,7 +25,7 @@ fi
 
 # Start test containers
 echo -e "${YELLOW}📦 Starting test containers...${NC}"
-docker-compose -f docker-compose.test.yml up -d
+docker compose -f docker-compose.test.yml up -d
 
 # Wait for services to be healthy
 echo -e "${YELLOW}⏳ Waiting for services to be ready...${NC}"
@@ -33,7 +33,7 @@ sleep 5
 
 # Check PostgreSQL health
 echo -e "${YELLOW}🔍 Checking PostgreSQL...${NC}"
-until docker-compose -f docker-compose.test.yml exec -T postgres-test pg_isready -U axontask_test > /dev/null 2>&1; do
+until docker compose -f docker-compose.test.yml exec -T postgres-test pg_isready -U axontask_test > /dev/null 2>&1; do
     echo "  Waiting for PostgreSQL..."
     sleep 2
 done
@@ -41,7 +41,7 @@ echo -e "${GREEN}  ✓ PostgreSQL ready${NC}"
 
 # Check Redis health
 echo -e "${YELLOW}🔍 Checking Redis...${NC}"
-until docker-compose -f docker-compose.test.yml exec -T redis-test redis-cli ping > /dev/null 2>&1; do
+until docker compose -f docker-compose.test.yml exec -T redis-test redis-cli ping > /dev/null 2>&1; do
     echo "  Waiting for Redis..."
     sleep 2
 done
@@ -64,7 +64,7 @@ TEST_EXIT_CODE=$?
 # Cleanup (optional - comment out to keep containers running for debugging)
 if [ "$1" != "--keep" ]; then
     echo -e "\n${YELLOW}🧹 Cleaning up test containers...${NC}"
-    docker-compose -f docker-compose.test.yml down
+    docker compose -f docker-compose.test.yml down
 fi
 
 # Report results
