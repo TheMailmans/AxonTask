@@ -96,7 +96,7 @@ async fn test_full_task_lifecycle() {
     common::wait_for(
         || async {
             let task = Task::find_by_id(&ctx.db, task_id).await.unwrap().unwrap();
-            task.state == TaskState::Running.as_str() || task.state == TaskState::Succeeded.as_str()
+            task.state == TaskState::Running || task.state == TaskState::Succeeded
         },
         10,
     )
@@ -107,7 +107,7 @@ async fn test_full_task_lifecycle() {
     common::wait_for(
         || async {
             let task = Task::find_by_id(&ctx.db, task_id).await.unwrap().unwrap();
-            task.state == TaskState::Succeeded.as_str()
+            task.state == TaskState::Succeeded
         },
         10,
     )
@@ -116,7 +116,7 @@ async fn test_full_task_lifecycle() {
 
     // Verify final state
     let task = Task::find_by_id(&ctx.db, task_id).await.unwrap().unwrap();
-    assert_eq!(task.state, TaskState::Succeeded.as_str());
+    assert_eq!(task.state, TaskState::Succeeded);
     assert!(task.started_at.is_some());
     assert!(task.ended_at.is_some());
 
@@ -160,7 +160,7 @@ async fn test_task_cancellation() {
     common::wait_for(
         || async {
             let task = Task::find_by_id(&ctx.db, task_id).await.unwrap().unwrap();
-            task.state == TaskState::Running.as_str()
+            task.state == TaskState::Running
         },
         10,
     )
@@ -182,7 +182,7 @@ async fn test_task_cancellation() {
     common::wait_for(
         || async {
             let task = Task::find_by_id(&ctx.db, task_id).await.unwrap().unwrap();
-            task.state == TaskState::Canceled.as_str()
+            task.state == TaskState::Canceled
         },
         10,
     )
@@ -191,7 +191,7 @@ async fn test_task_cancellation() {
 
     // Verify cancelled state
     let task = Task::find_by_id(&ctx.db, task_id).await.unwrap().unwrap();
-    assert_eq!(task.state, TaskState::Canceled.as_str());
+    assert_eq!(task.state, TaskState::Canceled);
 
     // Shutdown worker
     shutdown_token.cancel();
@@ -238,7 +238,7 @@ async fn test_timeout_enforcement() {
     common::wait_for(
         || async {
             let t = Task::find_by_id(&ctx.db, task.id).await.unwrap().unwrap();
-            t.state == TaskState::Running.as_str()
+            t.state == TaskState::Running
         },
         10,
     )
@@ -249,7 +249,7 @@ async fn test_timeout_enforcement() {
     common::wait_for(
         || async {
             let t = Task::find_by_id(&ctx.db, task.id).await.unwrap().unwrap();
-            t.state == TaskState::Timeout.as_str() || t.state == TaskState::Canceled.as_str()
+            t.state == TaskState::Timeout || t.state == TaskState::Canceled
         },
         15,
     )
@@ -259,7 +259,7 @@ async fn test_timeout_enforcement() {
     // Verify timeout/cancelled state
     let task = Task::find_by_id(&ctx.db, task.id).await.unwrap().unwrap();
     assert!(
-        task.state == TaskState::Timeout.as_str() || task.state == TaskState::Canceled.as_str(),
+        task.state == TaskState::Timeout || task.state == TaskState::Canceled,
         "Expected timeout or cancelled, got {:?}",
         task.state
     );

@@ -265,7 +265,7 @@ pub async fn start_task(
     let response = StartTaskResponse {
         task_id: task.id,
         stream_url: format!("/mcp/tasks/{}/stream", task.id),
-        status: task.state.clone(),
+        status: task.state.as_str().to_string(),
         created_at: task.created_at,
         timeout_s: Some(task.timeout_seconds),
     };

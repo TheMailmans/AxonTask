@@ -127,7 +127,7 @@ pub async fn cancel_task(
             return Ok(Json(CancelTaskResponse {
                 task_id,
                 canceled: false,
-                state: task.state.clone(),
+                state: task.state.as_str().to_string(),
                 message: format!("Task already in terminal state: {}", task.state),
             }));
         }
@@ -156,8 +156,8 @@ pub async fn cancel_task(
         })?;
 
     let task_state = updated_task
-        .map(|t| t.state.clone())
-        .unwrap_or_else(|| "pending".to_string());
+        .map(|t| t.state.as_str().to_string())
+        .unwrap_or_else(|| TaskState::Pending.as_str().to_string());
 
     tracing::info!(
         task_id = %task_id,

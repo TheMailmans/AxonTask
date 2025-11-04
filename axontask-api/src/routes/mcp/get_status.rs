@@ -190,7 +190,7 @@ pub async fn get_task_status(
     let response = TaskStatusResponse {
         task_id: task.id,
         name: task.name,
-        state: task.state.clone(),
+        state: task.state.as_str().to_string(),
         created_at: task.created_at,
         started_at: task.started_at,
         ended_at: task.ended_at,

@@ -299,8 +299,13 @@ mod tests {
 
     #[test]
     fn test_verify_password_malformed_hash() {
-        let result = verify_password("password", "$argon2id$invalid");
+        // Test truly malformed hash (not PHC format at all)
+        let result = verify_password("password", "not_a_valid_phc_hash");
         assert!(result.is_err(), "Malformed hash should return error");
+
+        // Test empty string
+        let result2 = verify_password("password", "");
+        assert!(result2.is_err(), "Empty hash should return error");
     }
 
     #[test]

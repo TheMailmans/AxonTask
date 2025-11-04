@@ -97,6 +97,12 @@ pub enum TaskState {
     Timeout,
 }
 
+impl std::fmt::Display for TaskState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
 impl TaskState {
     /// Converts state to string for database storage
     pub fn as_str(&self) -> &'static str {
@@ -164,8 +170,7 @@ pub struct Task {
     pub args: JsonValue,
 
     /// Current execution state
-    #[sqlx(try_from = "String")]
-    pub state: String,
+    pub state: TaskState,
 
     /// When the task started executing (null if not started)
     pub started_at: Option<DateTime<Utc>>,
