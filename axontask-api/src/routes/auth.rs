@@ -198,9 +198,6 @@ pub async fn register(
         CreateTenant {
             name: tenant_name,
             plan: TenantPlan::Trial,
-            stripe_customer_id: None,
-            stripe_subscription_id: None,
-            settings: serde_json::json!({}),
         },
     )
     .await?;

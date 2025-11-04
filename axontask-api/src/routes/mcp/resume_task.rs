@@ -109,7 +109,7 @@ pub async fn resume_task(
 ) -> Result<Sse<impl Stream<Item = Result<Event, Infallible>>>, ApiError> {
     tracing::info!(
         tenant_id = %auth.tenant_id,
-        user_id = %auth.user_id,
+        user_id = ?auth.user_id,
         task_id = %task_id,
         last_seq = request.last_seq,
         "Resuming task stream"

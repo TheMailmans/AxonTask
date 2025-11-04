@@ -161,7 +161,7 @@ pub async fn stream_task(
 ) -> Result<Sse<impl Stream<Item = Result<Event, Infallible>>>, ApiError> {
     tracing::info!(
         tenant_id = %auth.tenant_id,
-        user_id = %auth.user_id,
+        user_id = ?auth.user_id,
         task_id = %task_id,
         since_seq = query.since_seq,
         "Streaming task events"

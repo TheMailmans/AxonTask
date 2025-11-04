@@ -255,7 +255,7 @@ pub async fn list_api_keys(
         .map(|key| ApiKeyListItem {
             id: key.id.to_string(),
             name: key.name,
-            key_prefix: format!("{}...", &key.hash[..10]), // Show first 10 chars of hash as "prefix"
+            key_prefix: key.key_prefix,
             scopes: key.scopes,
             revoked: key.revoked,
             created_at: key.created_at,

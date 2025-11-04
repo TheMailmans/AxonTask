@@ -100,7 +100,7 @@ pub async fn cancel_task(
 ) -> Result<Json<CancelTaskResponse>, ApiError> {
     tracing::info!(
         tenant_id = %auth.tenant_id,
-        user_id = %auth.user_id,
+        user_id = ?auth.user_id,
         task_id = %task_id,
         "Canceling task"
     );

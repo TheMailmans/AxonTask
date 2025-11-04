@@ -52,7 +52,7 @@ use crate::error::ApiError;
 use axontask_shared::auth::middleware::AuthContext;
 use axontask_shared::models::tenant::{Tenant, TenantPlan};
 use axum::{
-    extract::{Request, State},
+    extract::{Extension, Request, State},
     http::{HeaderValue, StatusCode},
     middleware::Next,
     response::{IntoResponse, Response},

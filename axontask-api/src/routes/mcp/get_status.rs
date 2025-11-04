@@ -141,7 +141,7 @@ pub async fn get_task_status(
 ) -> Result<Json<TaskStatusResponse>, ApiError> {
     tracing::debug!(
         tenant_id = %auth.tenant_id,
-        user_id = %auth.user_id,
+        user_id = ?auth.user_id,
         task_id = %task_id,
         "Getting task status"
     );

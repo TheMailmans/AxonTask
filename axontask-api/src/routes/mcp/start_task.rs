@@ -162,7 +162,7 @@ pub async fn start_task(
 
     tracing::info!(
         tenant_id = %auth.tenant_id,
-        user_id = %auth.user_id,
+        user_id = ?auth.user_id,
         task_name = %request.name,
         adapter = %request.adapter,
         "Creating new task"
