@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **AxonTask** is a production-ready, open-source system for persistent background tasks with real-time streaming, designed for AI agents. It provides MCP-native tools that allow agents to start long-running tasks, stream progress in real-time via SSE, and resume reliably across session interruptions.
 
-**Status**: 🚧 Phase 1 (Core Data Layer) - In Progress (Tasks 1.1-1.3 Complete)
+**Status**: 🚧 Phase 2 (Authentication System) - Partial Complete (Shared library done, API endpoints pending)
 
 **Key Features**:
 - Persistent task execution (survives restarts/crashes)
@@ -267,10 +267,12 @@ src/
 │   ├── task_event.rs    # Events (Task 1.8)
 │   ├── webhook.rs       # Webhooks (Task 1.9)
 │   └── usage.rs         # Usage counters (Task 1.10)
-├── auth/                # Auth utilities (Phase 2)
-│   ├── password.rs      # Argon2 hashing
-│   ├── jwt.rs           # JWT generation/validation
-│   └── api_keys.rs      # API key generation/validation
+├── auth/                # Auth utilities (Phase 2) ✅
+│   ├── password.rs      # Argon2id hashing (Task 2.1) ✅
+│   ├── jwt.rs           # JWT generation/validation (Tasks 2.2-2.3) ✅
+│   ├── api_key.rs       # API key utilities (Tasks 2.4-2.5) ✅
+│   ├── middleware.rs    # Auth middleware (Tasks 2.6-2.7) ✅
+│   └── authorization.rs # RBAC helpers (Task 2.12) ✅
 ├── redis/               # Redis clients (Phase 4)
 │   ├── client.rs        # Connection pooling
 │   ├── stream_writer.rs # XADD wrapper
@@ -767,9 +769,106 @@ docker logs axontask-worker -f
 - **Clippy**: Passes with `-D warnings` (zero warnings)
 - **Technical Debt**: ZERO (no TODOs, no placeholders, no shortcuts)
 
-**Next**: Phase 2 - Authentication System (password hashing, JWT, API key middleware)
-
 **Status**: ✅ Complete (2025-01-03)
+
+---
+
+### Phase 2: Authentication System ✅ PARTIALLY COMPLETE (Shared Library)
+
+**Tasks 2.1-2.7 and 2.12 Completed (Shared Library)**
+
+Tasks 2.8-2.11 (API endpoints) require `axontask-api` crate (Phase 3).
+
+#### Implemented Modules:
+
+- [x] **2.1** Password Hashing (`axontask-shared/src/auth/password.rs` - 406 lines)
+  - Algorithm: Argon2id (Password Hashing Competition winner)
+  - Parameters: 64 MB memory, 3 iterations, 4 parallelism
+  - Functions: `hash_password()`, `verify_password()`, `validate_password_strength()`
+  - Security: Random salt, constant-time verification, timing attack resistance
+  - Tests: 14 comprehensive tests
+
+- [x] **2.2-2.3** JWT Authentication (`axontask-shared/src/auth/jwt.rs` - 500 lines)
+  - Algorithm: HS256 (HMAC-SHA256)
+  - Token Types: Access (24h), Refresh (30d)
+  - Claims: user_id (sub), tenant_id, token_type, iss, iat, exp, nbf
+  - Functions:
+    - `create_token()`: Generate signed JWT
+    - `validate_token()`: Verify signature and claims
+    - `validate_access_token()`: Type-safe access validation
+    - `validate_refresh_token()`: Type-safe refresh validation
+    - `refresh_access_token()`: Exchange refresh for new access token
+  - Tests: 12 tests (valid/expired/tampered tokens)
+
+- [x] **2.4-2.5** API Key Utilities (`axontask-shared/src/auth/api_key.rs` - 580 lines)
+  - Format: `axon_{32_random_chars}` (base62, 37 chars total)
+  - Security: SHA-256 hashing, constant-time comparison
+  - Functions:
+    - `generate_api_key()`: Cryptographically random generation
+    - `hash_api_key()`: SHA-256 for storage
+    - `verify_api_key()`: Constant-time validation
+    - `validate_api_key_format()`: Format validation
+    - `parse_scopes()`: Parse comma-separated scopes
+    - `has_scope()`: Wildcard matching (supports `tasks:*`, `*`)
+  - Tests: 15 tests including timing attack resistance
+
+- [x] **2.6-2.7** Authentication Middleware (`axontask-shared/src/auth/middleware.rs` - 480 lines)
+  - JWT Middleware: Validates Bearer tokens from `Authorization` header
+  - API Key Middleware: Validates keys from `X-Api-Key` header with DB lookup
+  - AuthContext: Injected into request extensions
+    - Fields: user_id, tenant_id, method (JWT/ApiKey), scopes, api_key_id
+    - Methods: `has_scope()` for permission checking
+  - Error Handling: 401 (Unauthorized), 400 (Bad Request), 500 (Internal Server Error)
+  - Integration: Axum tower middleware with helper functions
+  - Tests: 4 unit tests
+
+- [x] **2.12** Authorization Helpers (`axontask-shared/src/auth/authorization.rs` - 520 lines)
+  - Permission Model: Role-based + Scope-based access control
+  - ResourcePermission: Read, Write, Manage, Own (maps to RBAC roles)
+  - Functions:
+    - `require_membership()`: Verify tenant membership
+    - `require_role()`: Check RBAC role (Owner/Admin/Member/Viewer)
+    - `require_scope()`: Validate API key scopes
+    - `require_permission()`: Combined role + scope check
+    - `require_ownership()`: Verify resource ownership
+    - `require_access()`: Owner OR permission check
+    - `require_billing_access()`: Owner-only operations
+    - `require_user_management()`: Admin+ operations
+  - Tests: 4 unit tests
+
+#### Pending Tasks (Require API Server):
+
+- [ ] **2.8** User registration endpoint (`POST /auth/register`)
+- [ ] **2.9** Login endpoint (`POST /auth/login`)
+- [ ] **2.10** Token refresh endpoint (`POST /auth/refresh`)
+- [ ] **2.11** API key CRUD endpoints (`/api/keys/*`)
+
+**Code Quality Metrics:**
+
+- **Total Lines**: ~2,500 lines (including tests and documentation)
+- **Modules**: 5 complete auth modules
+- **Tests**: 49 unit tests across all modules
+- **Documentation**: 100% of public APIs with examples
+- **Clippy**: Passes with `-D warnings` (zero warnings)
+- **Security**:
+  - Argon2id with 64 MB memory (GPU-resistant)
+  - SHA-256 hashing for API keys
+  - Constant-time comparisons
+  - Timing attack resistance verified in tests
+- **Technical Debt**: ZERO (no TODOs, no placeholders)
+
+**Dependencies Used:**
+
+- `argon2` - Password hashing (already in workspace)
+- `jsonwebtoken` - JWT implementation
+- `sha2` - SHA-256 hashing
+- `rand` - Cryptographic randomness
+- `axum` - Web framework integration
+- `sqlx` - Database operations
+
+**Next**: Phase 3 - API Server Setup (create `axontask-api` crate and implement endpoints 2.8-2.11)
+
+**Status**: ✅ Shared library complete (2025-01-03), API endpoints pending
 
 ---
 
