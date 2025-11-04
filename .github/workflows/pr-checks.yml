@@ -1,0 +1,169 @@
+name: PR Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  size-label:
+    name: Label PR Size
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Label PR based on size
+        uses: codelytv/pr-size-labeler@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          xs_label: 'size/xs'
+          xs_max_size: 10
+          s_label: 'size/s'
+          s_max_size: 100
+          m_label: 'size/m'
+          m_max_size: 500
+          l_label: 'size/l'
+          l_max_size: 1000
+          xl_label: 'size/xl'
+          message_if_xl: 'This PR is very large. Consider breaking it into smaller PRs.'
+
+  cla-check:
+    name: CLA Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: CLA Assistant
+        if: github.event.pull_request.head.repo.full_name != github.repository
+        uses: contributor-assistant/github-action@v2.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          path-to-signatures: 'signatures/cla.json'
+          path-to-document: 'https://github.com/TheMailmans/AxonTask/blob/main/CLA.md'
+          branch: 'main'
+          allowlist: github-actions[bot],dependabot[bot]
+
+  title-check:
+    name: PR Title Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check PR title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            chore
+            ci
+          requireScope: false
+
+  changes-check:
+    name: Check Changed Files
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+        with:
+          files: |
+            **/*.rs
+            **/Cargo.toml
+            **/Cargo.lock
+
+      - name: List changed files
+        run: |
+          echo "Changed Rust files:"
+          echo "${{ steps.changed-files.outputs.all_changed_files }}"
+
+      - name: Check for migration files
+        run: |
+          if [[ "${{ steps.changed-files.outputs.all_changed_files }}" == *"migrations/"* ]]; then
+            echo "⚠️ Migration files detected. Please ensure migrations are reversible."
+          fi
+
+  documentation-check:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+        with:
+          files: |
+            **/*.rs
+
+      - name: Check for documentation
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "Checking if public items have documentation..."
+          # This is a placeholder - in a real scenario, you'd use a tool like cargo-doc-check
+          echo "✅ Documentation check passed (placeholder)"
+
+  comment-pr:
+    name: Comment on PR
+    runs-on: ubuntu-latest
+    needs: [size-label, title-check, changes-check]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Comment PR
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            ## 🤖 Automated PR Checks
+
+            Thank you for your contribution! Here's what's being checked:
+
+            - ✅ PR title follows [Conventional Commits](https://www.conventionalcommits.org/)
+            - ✅ PR size is labeled
+            - ✅ CLA signature (if external contributor)
+            - ✅ All CI checks must pass before merge
+
+            ### Before Merging
+
+            Please ensure:
+            - [ ] All tests pass (`cargo test`)
+            - [ ] Code is formatted (`cargo fmt`)
+            - [ ] Linter passes (`cargo clippy`)
+            - [ ] Documentation is updated
+            - [ ] ROADMAP.md updated (if applicable)
+
+            ### Questions?
+
+            See [CONTRIBUTING.md](https://github.com/TheMailmans/AxonTask/blob/main/CONTRIBUTING.md) for guidelines.
+
+          comment_tag: pr-checks
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

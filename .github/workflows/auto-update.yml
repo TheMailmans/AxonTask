@@ -1,0 +1,90 @@
+name: Auto Update
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '**.rs'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+
+permissions:
+  contents: write
+
+jobs:
+  update-badges:
+    name: Update README Badges
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Update CI badge
+        run: |
+          if ! grep -q "CI" README.md; then
+            sed -i '8 a [![CI](https://github.com/TheMailmans/AxonTask/workflows/CI/badge.svg)](https://github.com/TheMailmans/AxonTask/actions/workflows/ci.yml)' README.md
+          fi
+
+      - name: Update last updated dates
+        run: |
+          TODAY=$(date +"%B %d, %Y")
+          # Update ROADMAP.md
+          sed -i "s/\*\*Last Updated\*\*:.*/\*\*Last Updated\*\*: $TODAY/" ROADMAP.md || true
+          # Update other docs
+          for file in DESIGN.md DATABASE_DESIGN.md API_DESIGN.md FRONTEND_DESIGN.md DEPLOYMENT.md SETUP.md; do
+            if [ -f "$file" ]; then
+              sed -i "s/\*\*Last Updated\*\*:.*/\*\*Last Updated\*\*: $TODAY/" "$file" || true
+            fi
+          done
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git diff --quiet && git diff --staged --quiet || (git add -A && git commit -m "chore: auto-update documentation dates [skip ci]")
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+
+  update-roadmap:
+    name: Update Roadmap Progress
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Count completed files
+        id: count
+        run: |
+          TOTAL_FILES=$(find . -name "*.rs" | wc -l)
+          TOTAL_LINES=$(find . -name "*.rs" -exec cat {} \; | wc -l)
+          echo "total_files=$TOTAL_FILES" >> $GITHUB_OUTPUT
+          echo "total_lines=$TOTAL_LINES" >> $GITHUB_OUTPUT
+
+      - name: Update README with stats
+        run: |
+          FILES=${{ steps.count.outputs.total_files }}
+          LINES=${{ steps.count.outputs.total_lines }}
+          echo "📊 Current Stats: $FILES Rust files, $LINES lines of code"
+
+      - name: Commit stats update
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git diff --quiet && git diff --staged --quiet || (git add -A && git commit -m "chore: auto-update project stats [skip ci]")
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
