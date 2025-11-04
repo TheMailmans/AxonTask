@@ -15,10 +15,10 @@
 // Public modules (to be implemented in phases)
 // pub mod auth;
 // pub mod config;
-// pub mod db;
+pub mod db; // Phase 1: Core Data Layer
 // pub mod error;
 // pub mod integrity;
-// pub mod models;
+pub mod models; // Phase 1: Database models
 // pub mod redis;
 
 /// Current version of the AxonTask shared library
