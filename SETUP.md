@@ -1,7 +1,7 @@
 # AxonTask Setup Guide
 
 **Version**: 1.0
-**Last Updated**: January 3, 2025
+**Last Updated**: November 04, 2025
 **For**: Anyone deploying AxonTask
 **Status**: Complete Step-by-Step Guide
 
@@ -566,5 +566,5 @@ You now have a fully functional AxonTask deployment. For advanced configuration,
 ---
 
 **Document Version**: 1.0
-**Last Updated**: January 3, 2025
+**Last Updated**: November 04, 2025
 **Maintained By**: Tyler Mailman
