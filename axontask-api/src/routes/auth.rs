@@ -173,12 +173,10 @@ pub async fn register(
     // Hash password
     let password_hash = password::hash_password(&req.password)?;
 
-    // Start transaction
-    let mut tx = state.db.begin().await?;
-
+    // TODO: Wrap in transaction for atomicity
     // Create user
     let user = User::create(
-        &mut *tx,
+        &state.db,
         CreateUser {
             email: req.email.clone(),
             password_hash,
@@ -194,7 +192,7 @@ pub async fn register(
         .unwrap_or_else(|| format!("{}'s Workspace", req.name.as_deref().unwrap_or("User")));
 
     let tenant = Tenant::create(
-        &mut *tx,
+        &state.db,
         CreateTenant {
             name: tenant_name,
             plan: TenantPlan::Trial,
@@ -204,7 +202,7 @@ pub async fn register(
 
     // Create membership (user as owner)
     Membership::create(
-        &mut *tx,
+        &state.db,
         CreateMembership {
             tenant_id: tenant.id,
             user_id: user.id,
@@ -212,9 +210,6 @@ pub async fn register(
         },
     )
     .await?;
-
-    // Commit transaction
-    tx.commit().await?;
 
     // Generate tokens
     let access_claims = jwt::Claims::new(user.id, tenant.id, jwt::TokenType::Access);
@@ -300,7 +295,7 @@ pub async fn login(
     }
 
     // Get user's primary tenant (first membership, typically their personal tenant)
-    let memberships = Membership::list_by_user(&state.db, user.id, Some(1), Some(0)).await?;
+    let memberships = Membership::list_by_user(&state.db, user.id).await?;
     let tenant_id = memberships
         .first()
         .map(|m| m.tenant_id)

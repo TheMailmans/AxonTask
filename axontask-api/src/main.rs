@@ -46,9 +46,11 @@ async fn main() -> anyhow::Result<()> {
     let db_config = pool::DatabaseConfig {
         url: config.database.url.clone(),
         max_connections: config.database.max_connections,
-        acquire_timeout_seconds: 30,
+        min_connections: 5,
+        connect_timeout_seconds: 30,
         idle_timeout_seconds: Some(600),
         max_lifetime_seconds: Some(1800),
+        test_before_acquire: true,
     };
 
     let pool = pool::create_pool(db_config).await?;

@@ -179,7 +179,7 @@ pub async fn get_task_status(
     let metrics = if duration_ms.is_some() || task.bytes_streamed > 0 {
         Some(TaskMetrics {
             duration_ms,
-            bytes_streamed: task.bytes_streamed,
+            bytes_streamed: Some(task.bytes_streamed),
             task_minutes,
         })
     } else {
@@ -194,7 +194,7 @@ pub async fn get_task_status(
         created_at: task.created_at,
         started_at: task.started_at,
         ended_at: task.ended_at,
-        last_seq: task.cursor,
+        last_seq: Some(task.cursor),
         metrics,
         error: task.error_message,
     };

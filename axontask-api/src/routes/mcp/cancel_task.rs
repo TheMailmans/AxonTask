@@ -122,17 +122,20 @@ pub async fn cancel_task(
         })?;
 
     // Check if task can be canceled
-    match task.state {
-        TaskState::Succeeded | TaskState::Failed | TaskState::Canceled | TaskState::Timeout => {
+    match task.state.as_str() {
+        "succeeded" | "failed" | "canceled" | "timeout" => {
             return Ok(Json(CancelTaskResponse {
                 task_id,
                 canceled: false,
-                state: task.state.as_str().to_string(),
-                message: format!("Task already in terminal state: {}", task.state.as_str()),
+                state: task.state.clone(),
+                message: format!("Task already in terminal state: {}", task.state),
             }));
         }
-        TaskState::Pending | TaskState::Running => {
+        "pending" | "running" => {
             // Can be canceled
+        }
+        _ => {
+            // Unknown state, allow cancellation attempt
         }
     }
 

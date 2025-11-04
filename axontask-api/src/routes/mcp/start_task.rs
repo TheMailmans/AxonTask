@@ -243,7 +243,7 @@ pub async fn start_task(
         name: request.name.clone(),
         adapter: request.adapter.clone(),
         args: request.args.clone(),
-        timeout_seconds: request.timeout_s,
+        timeout_seconds: request.timeout_s.unwrap_or(3600), // Default 1 hour
     };
 
     let task = Task::create(&state.db, create_task).await.map_err(|e| {
@@ -265,9 +265,9 @@ pub async fn start_task(
     let response = StartTaskResponse {
         task_id: task.id,
         stream_url: format!("/mcp/tasks/{}/stream", task.id),
-        status: task.state.as_str().to_string(),
+        status: task.state.clone(),
         created_at: task.created_at,
-        timeout_s: task.timeout_seconds,
+        timeout_s: Some(task.timeout_seconds),
     };
 
     Ok(Json(response))
