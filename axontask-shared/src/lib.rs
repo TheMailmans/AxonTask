@@ -13,7 +13,7 @@
 //! - `error`: Common error types
 
 // Public modules (to be implemented in phases)
-// pub mod auth;
+pub mod auth; // Phase 2: Authentication System
 // pub mod config;
 pub mod db; // Phase 1: Core Data Layer
 // pub mod error;
