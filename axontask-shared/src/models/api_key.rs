@@ -305,6 +305,25 @@ impl ApiKey {
         Ok(result.rows_affected() > 0)
     }
 
+    /// Revokes an API key with tenant isolation
+    ///
+    /// This ensures the API key belongs to the specified tenant before revoking.
+    pub async fn revoke_with_tenant(pool: &PgPool, id: Uuid, tenant_id: Uuid) -> Result<bool, sqlx::Error> {
+        let result = sqlx::query(
+            r#"
+            UPDATE api_keys
+            SET revoked = TRUE, revoked_at = NOW()
+            WHERE id = $1 AND tenant_id = $2
+            "#,
+        )
+        .bind(id)
+        .bind(tenant_id)
+        .execute(pool)
+        .await?;
+
+        Ok(result.rows_affected() > 0)
+    }
+
     /// Deletes an API key
     pub async fn delete(pool: &PgPool, id: Uuid) -> Result<bool, sqlx::Error> {
         let result = sqlx::query("DELETE FROM api_keys WHERE id = $1")
