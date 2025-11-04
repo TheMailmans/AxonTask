@@ -1,0 +1,54 @@
+# Rust
+/target/
+**/*.rs.bk
+*.pdb
+Cargo.lock
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# sqlx
+.sqlx/
+!sqlx-data.json
+
+# Coverage
+coverage/
+*.profraw
+
+# Build artifacts
+dist/
+build/
+
+# Testing
+test-output/
+
+# Documentation
+/target/doc/
+
+# Node (if frontend is added)
+node_modules/
+.next/
+out/
+.turbo/
+
+# Docker
+docker-compose.override.yml

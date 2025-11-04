@@ -1,0 +1,85 @@
+[workspace]
+members = [
+    "axontask-api",
+    "axontask-worker",
+    "axontask-shared",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Tyler Mailman <tyler@axonhub.io>"]
+license = "AGPL-3.0"
+repository = "https://github.com/tylermailman/axontask"
+homepage = "https://github.com/tylermailman/axontask"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+tokio-stream = "0.1"
+
+# Web framework
+axum = { version = "0.7", features = ["macros"] }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace", "compression"] }
+
+# Database
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json"] }
+
+# Redis
+redis = { version = "0.24", features = ["tokio-comp", "connection-manager", "streams"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Authentication
+jsonwebtoken = "9.2"
+argon2 = { version = "0.5", features = ["std"] }
+
+# Cryptography
+sha2 = "0.10"
+ed25519-dalek = { version = "2.1", features = ["serde"] }
+rand = "0.8"
+
+# HTTP client
+reqwest = { version = "0.11", features = ["json", "rustls-tls"] }
+
+# Logging and tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# UUID
+uuid = { version = "1.6", features = ["v4", "serde"] }
+
+# Configuration
+config = "0.14"
+dotenvy = "0.15"
+
+# Validation
+validator = { version = "0.18", features = ["derive"] }
+
+# Utilities
+bytes = "1.5"
+futures = "0.3"
+
+[profile.dev]
+opt-level = 0
+debug = true
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+strip = true
+codegen-units = 1
+
+[profile.test]
+opt-level = 1
