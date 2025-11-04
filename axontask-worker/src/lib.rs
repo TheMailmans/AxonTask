@@ -25,7 +25,7 @@ pub mod adapters;
 // pub mod control;
 pub mod events;
 // pub mod metrics;
-// pub mod orchestrator;
+pub mod orchestrator;
 pub mod queue;
 // pub mod shutdown;
 // pub mod timeout;
