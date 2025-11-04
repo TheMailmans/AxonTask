@@ -120,6 +120,25 @@ impl MembershipRole {
     pub fn can_view_all_tasks(&self) -> bool {
         matches!(self, MembershipRole::Owner | MembershipRole::Admin)
     }
+
+    /// Checks if this role has permission level of the required role
+    ///
+    /// Hierarchy: Owner > Admin > Member > Viewer
+    pub fn has_permission(&self, required: &MembershipRole) -> bool {
+        let self_level = self.permission_level();
+        let required_level = required.permission_level();
+        self_level >= required_level
+    }
+
+    /// Returns numeric permission level for comparison
+    fn permission_level(&self) -> u8 {
+        match self {
+            MembershipRole::Owner => 4,
+            MembershipRole::Admin => 3,
+            MembershipRole::Member => 2,
+            MembershipRole::Viewer => 1,
+        }
+    }
 }
 
 /// Membership model representing user-tenant relationship with role

@@ -70,8 +70,8 @@ pub enum AuthMethod {
 /// ```
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AuthContext {
-    /// Authenticated user ID
-    pub user_id: Uuid,
+    /// Authenticated user ID (None for API key auth)
+    pub user_id: Option<Uuid>,
 
     /// Current tenant ID
     pub tenant_id: Uuid,
@@ -90,7 +90,7 @@ impl AuthContext {
     /// Creates auth context from JWT claims
     pub fn from_jwt(user_id: Uuid, tenant_id: Uuid) -> Self {
         Self {
-            user_id,
+            user_id: Some(user_id),
             tenant_id,
             method: AuthMethod::Jwt,
             scopes: None,
@@ -101,7 +101,7 @@ impl AuthContext {
     /// Creates auth context from API key
     pub fn from_api_key(api_key: &ApiKey) -> Self {
         Self {
-            user_id: api_key.user_id,
+            user_id: None, // API keys are not user-specific
             tenant_id: api_key.tenant_id,
             method: AuthMethod::ApiKey,
             scopes: Some(api_key.scopes.clone()),
@@ -148,25 +148,23 @@ pub enum AuthError {
 
 impl IntoResponse for AuthError {
     fn into_response(self) -> Response {
-        let (status, message) = match self {
+        match self {
             AuthError::MissingCredentials => {
-                (StatusCode::UNAUTHORIZED, "Missing credentials")
+                (StatusCode::UNAUTHORIZED, "Missing credentials").into_response()
             }
             AuthError::InvalidFormat(msg) => {
-                (StatusCode::BAD_REQUEST, msg.as_str())
+                (StatusCode::BAD_REQUEST, msg).into_response()
             }
             AuthError::InvalidToken(msg) => {
-                (StatusCode::UNAUTHORIZED, msg.as_str())
+                (StatusCode::UNAUTHORIZED, msg).into_response()
             }
             AuthError::InvalidApiKey(msg) => {
-                (StatusCode::UNAUTHORIZED, msg.as_str())
+                (StatusCode::UNAUTHORIZED, msg).into_response()
             }
             AuthError::DatabaseError(_) => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error")
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response()
             }
-        };
-
-        (status, message).into_response()
+        }
     }
 }
 

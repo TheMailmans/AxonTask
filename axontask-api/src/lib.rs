@@ -1,4 +1,4 @@
-///! # AxonTask API Server Library
+//! # AxonTask API Server Library
 //!
 //! This library provides the core functionality for the AxonTask API server.
 //!

@@ -48,8 +48,9 @@
 /// ```
 
 use chrono::{DateTime, Utc};
+use hmac::{Hmac, Mac};
 use serde::{Deserialize, Serialize};
-use sha2::{Digest, Sha256};
+use sha2::Sha256;
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -160,10 +161,9 @@ impl Webhook {
     /// assert_eq!(sig.len(), 64); // SHA-256 hex is 64 chars
     /// ```
     pub fn generate_signature(&self, payload: &[u8]) -> String {
-        let mut mac = sha2::Hmac::<Sha256>::new_from_slice(&self.secret)
+        let mut mac = Hmac::<Sha256>::new_from_slice(&self.secret)
             .expect("HMAC can take key of any size");
 
-        use sha2::digest::Mac;
         mac.update(payload);
 
         format!("{:x}", mac.finalize().into_bytes())

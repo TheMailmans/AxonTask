@@ -173,9 +173,15 @@ pub async fn require_membership(
 pub async fn require_role(
     pool: &PgPool,
     tenant_id: Uuid,
-    user_id: Uuid,
+    user_id: Option<Uuid>,
     required_role: MembershipRole,
 ) -> Result<(), AuthzError> {
+    // API keys don't have user_id, so they can't have roles
+    let user_id = user_id.ok_or(AuthzError::InsufficientRole {
+        required: required_role,
+        actual: MembershipRole::Viewer,
+    })?;
+
     let user_role = Membership::get_role(pool, tenant_id, user_id)
         .await?
         .ok_or(AuthzError::NotMember(tenant_id))?;
@@ -291,7 +297,7 @@ pub async fn require_permission(
 /// # }
 /// ```
 pub fn require_ownership(auth: &AuthContext, resource_owner_id: Uuid) -> Result<(), AuthzError> {
-    if auth.user_id != resource_owner_id {
+    if auth.user_id != Some(resource_owner_id) {
         return Err(AuthzError::NotAuthorized);
     }
 
@@ -337,7 +343,7 @@ pub async fn require_access(
     scope: &str,
 ) -> Result<(), AuthzError> {
     // Owner always has access
-    if auth.user_id == resource_owner_id {
+    if auth.user_id == Some(resource_owner_id) {
         require_scope(auth, scope)?;
         return Ok(());
     }

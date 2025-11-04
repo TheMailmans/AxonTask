@@ -233,7 +233,8 @@ impl StreamReader {
                     .map
                     .into_iter()
                     .filter_map(|(k, v)| {
-                        let key = String::from_utf8(k.as_ref().to_vec()).ok()?;
+                        let key_bytes: &[u8] = k.as_ref();
+                        let key = String::from_utf8(key_bytes.to_vec()).ok()?;
                         let value = redis::from_redis_value::<String>(&v).ok()?;
                         Some((key, value))
                     })
@@ -338,7 +339,8 @@ impl StreamReader {
                     .map
                     .into_iter()
                     .filter_map(|(k, v)| {
-                        let key = String::from_utf8(k.as_ref().to_vec()).ok()?;
+                        let key_bytes: &[u8] = k.as_ref();
+                        let key = String::from_utf8(key_bytes.to_vec()).ok()?;
                         let value = redis::from_redis_value::<String>(&v).ok()?;
                         Some((key, value))
                     })
@@ -458,7 +460,8 @@ impl StreamReader {
                     .map
                     .into_iter()
                     .filter_map(|(k, v)| {
-                        let key = String::from_utf8(k.as_ref().to_vec()).ok()?;
+                        let key_bytes: &[u8] = k.as_ref();
+                        let key = String::from_utf8(key_bytes.to_vec()).ok()?;
                         let value = redis::from_redis_value::<String>(&v).ok()?;
                         Some((key, value))
                     })

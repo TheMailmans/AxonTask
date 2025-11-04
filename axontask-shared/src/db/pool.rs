@@ -234,8 +234,8 @@ pub fn get_pool_stats(pool: &PgPool) -> PoolStats {
     let idle = pool.num_idle();
 
     PoolStats {
-        active_connections: size.saturating_sub(idle) as usize,
-        idle_connections: idle as usize,
+        active_connections: (size.saturating_sub(idle as u32)) as usize,
+        idle_connections: idle,
         total_connections: size as usize,
     }
 }

@@ -179,6 +179,17 @@ impl ApiKey {
         key.chars().take(10).collect()
     }
 
+    /// Checks if the API key is expired
+    ///
+    /// Returns true if expires_at is set and is in the past
+    pub fn is_expired(&self) -> bool {
+        if let Some(expires_at) = self.expires_at {
+            expires_at < Utc::now()
+        } else {
+            false
+        }
+    }
+
     /// Creates a new API key
     ///
     /// Returns both the database record and the plaintext key.
