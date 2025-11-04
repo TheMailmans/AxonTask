@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # PostgreSQL for testing
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: axontask-postgres-test
+    environment:
+      POSTGRES_USER: axontask_test
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: axontask_test
+    ports:
+      - "5433:5432"  # Use 5433 to avoid conflicts with dev database
+    volumes:
+      - postgres-test-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U axontask_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis for testing
+  redis-test:
+    image: redis:7-alpine
+    container_name: axontask-redis-test
+    ports:
+      - "6380:6379"  # Use 6380 to avoid conflicts with dev Redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-test-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-test-data:
+  redis-test-data:
