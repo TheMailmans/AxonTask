@@ -134,10 +134,20 @@ pub fn build_router(state: AppState) -> Router {
             jwt_auth_layer,
         ));
 
+    // MCP tool routes (require JWT or API key authentication)
+    let mcp_routes = Router::new()
+        .route("/start_task", post(routes::mcp::start_task))
+        .route("/tasks/:task_id/status", get(routes::mcp::get_task_status))
+        .layer(axum::middleware::from_fn_with_state(
+            state.clone(),
+            jwt_auth_layer,
+        ));
+
     // Build complete v1 API
     let v1_routes = Router::new()
         .nest("/auth", auth_routes)
-        .nest("/api-keys", api_key_routes);
+        .nest("/api-keys", api_key_routes)
+        .nest("/mcp", mcp_routes);
 
     // Configure CORS based on environment
     let cors = if state.config.api.cors_origins.contains(&"*".to_string()) {
