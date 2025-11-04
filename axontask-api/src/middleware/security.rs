@@ -148,7 +148,7 @@ mod tests {
         routing::get,
         Router,
     };
-    use tower::ServiceExt;
+    use tower::Service as _;
 
     #[tokio::test]
     async fn test_security_headers_applied() {
@@ -156,12 +156,12 @@ mod tests {
             (StatusCode::OK, "test")
         }
 
-        let app = Router::new()
+        let mut app = Router::new()
             .route("/test", get(handler))
             .layer(SecurityHeadersLayer::new(false));
 
         let response = app
-            .oneshot(
+            .call(
                 Request::builder()
                     .uri("/test")
                     .body(Body::empty())
@@ -198,12 +198,12 @@ mod tests {
             (StatusCode::OK, "test")
         }
 
-        let app = Router::new()
+        let mut app = Router::new()
             .route("/test", get(handler))
             .layer(SecurityHeadersLayer::new(true));
 
         let response = app
-            .oneshot(
+            .call(
                 Request::builder()
                     .uri("/test")
                     .body(Body::empty())
@@ -222,12 +222,12 @@ mod tests {
             (StatusCode::OK, "test")
         }
 
-        let app = Router::new()
+        let mut app = Router::new()
             .route("/test", get(handler))
             .layer(SecurityHeadersLayer::new(false));
 
         let response = app
-            .oneshot(
+            .call(
                 Request::builder()
                     .uri("/test")
                     .body(Body::empty())

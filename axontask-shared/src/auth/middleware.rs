@@ -375,7 +375,7 @@ mod tests {
 
         let context = AuthContext::from_jwt(user_id, tenant_id);
 
-        assert_eq!(context.user_id, user_id);
+        assert_eq!(context.user_id, Some(user_id));
         assert_eq!(context.tenant_id, tenant_id);
         assert_eq!(context.method, AuthMethod::Jwt);
         assert!(context.scopes.is_none());

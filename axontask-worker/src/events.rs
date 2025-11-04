@@ -292,6 +292,9 @@ mod tests {
 
         let redis_config = axontask_shared::redis::RedisConfig {
             url: "redis://localhost:6379".to_string(),
+            connection_timeout_secs: 5,
+            command_timeout_secs: 10,
+            max_retries: 3,
         };
 
         let rt = tokio::runtime::Runtime::new().unwrap();
@@ -303,7 +306,9 @@ mod tests {
 
             let emitter = EventEmitter::new(redis_client);
 
+            let task_id = Uuid::new_v4();
             let event1 = TaskEvent {
+                task_id,
                 seq: 0,
                 kind: "started".to_string(),
                 payload: serde_json::json!({"adapter": "test"}),
