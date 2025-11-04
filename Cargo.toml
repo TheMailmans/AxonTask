@@ -70,6 +70,7 @@ validator = { version = "0.18", features = ["derive"] }
 # Utilities
 bytes = "1.5"
 futures = "0.3"
+hex = "0.4"
 
 [profile.dev]
 opt-level = 0

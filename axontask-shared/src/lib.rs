@@ -16,10 +16,11 @@
 pub mod auth; // Phase 2: Authentication System
 // pub mod config;
 pub mod db; // Phase 1: Core Data Layer
+pub mod events; // Phase 4: Event serialization
 // pub mod error;
 // pub mod integrity;
 pub mod models; // Phase 1: Database models
-// pub mod redis;
+pub mod redis; // Phase 4: Redis Streams Infrastructure
 
 /// Current version of the AxonTask shared library
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
