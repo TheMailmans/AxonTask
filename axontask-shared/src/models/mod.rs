@@ -37,10 +37,8 @@
 pub mod user; // Phase 1, Task 1.3
 pub mod tenant; // Phase 1, Task 1.4
 pub mod membership; // Phase 1, Task 1.5
-
-// Will be added in subsequent tasks
-// pub mod api_key;    // Task 1.6
-// pub mod task;       // Task 1.7
-// pub mod task_event; // Task 1.8
-// pub mod webhook;    // Task 1.9
-// pub mod usage;      // Task 1.10
+pub mod api_key; // Phase 1, Task 1.6
+pub mod task; // Phase 1, Task 1.7
+pub mod task_event; // Phase 1, Task 1.8
+pub mod webhook; // Phase 1, Task 1.9
+pub mod usage; // Phase 1, Task 1.10 ✅ PHASE 1 COMPLETE!
