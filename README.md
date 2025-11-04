@@ -11,8 +11,6 @@
 
 AxonTask is a production-ready, open-source system that enables AI agents to start long-running background tasks, stream progress in real-time via Server-Sent Events (SSE), and resume reliably across session interruptions.
 
-**Status**: 🚧 Phase 0 (Foundation) - See [ROADMAP.md](ROADMAP.md) for detailed progress.
-
 ---
 
 ## Features
@@ -256,7 +254,7 @@ AxonTask is licensed under the **Business Source License 1.1 (BSL)**. See [LICEN
 - Reselling or white-labeling AxonTask
 
 **🔄 Future Open Source Conversion:**
-- On January 1, 2029 (4 years), this code converts to **Apache 2.0** license
+- On January 1, 2036 (10 years), this code converts to **Apache 2.0** license
 - Becomes fully open source and permissive
 
 ### Commercial Licensing
@@ -269,7 +267,7 @@ Need a commercial license? We offer three tiers:
 
 See [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md) for complete details and pricing.
 
-**Contact**: tyler@axonhub.io for commercial licensing inquiries.
+**Contact**: themailmaninbox@gmail.com for commercial licensing inquiries.
 
 ---
 
