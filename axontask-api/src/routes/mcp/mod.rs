@@ -50,9 +50,15 @@
 /// → {"canceled": true}
 /// ```
 
+pub mod cancel_task;
 pub mod get_status;
+pub mod resume_task;
 pub mod start_task;
+pub mod stream_task;
 
 // Re-export handlers for convenience
+pub use cancel_task::{cancel_task, CancelTaskResponse};
 pub use get_status::{get_task_status, TaskStatusResponse};
+pub use resume_task::{resume_task, ResumeTaskRequest};
 pub use start_task::{start_task, StartTaskRequest, StartTaskResponse};
+pub use stream_task::{stream_task, StreamTaskQuery};
