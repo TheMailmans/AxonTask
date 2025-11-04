@@ -7,6 +7,7 @@ Thank you for your interest in contributing to AxonTask! This document provides 
 ## Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
+- [Open Source Scope](#open-source-scope)
 - [Getting Started](#getting-started)
 - [Development Workflow](#development-workflow)
 - [Code Standards](#code-standards)
@@ -33,6 +34,42 @@ Thank you for your interest in contributing to AxonTask! This document provides 
 - Trolling, insulting comments, or unconstructive criticism
 - Publishing others' private information without permission
 - Any conduct that would be inappropriate in a professional setting
+
+---
+
+## Open Source Scope
+
+**AxonTask Phase 0 (Foundation) is the complete open source release.** This is production-ready software with zero technical debt.
+
+### What's Included in Open Source
+
+The open source version provides:
+- Complete database layer with 11 tables and full CRUD operations
+- Authentication system (JWT + API keys)
+- Rate limiting and quota enforcement
+- Redis Streams infrastructure for durable event replay
+- Comprehensive test suite (177 tests)
+- Production-grade Rust implementation
+
+### Types of Contributions Welcome
+
+We welcome contributions for:
+- ✅ **Bug fixes and security patches** - Critical for maintaining quality
+- ✅ **Documentation improvements** - Help others understand and use AxonTask
+- ✅ **Performance optimizations** - Make it faster and more efficient
+- ✅ **Community-requested features** - That align with Phase 0 scope
+- ✅ **Additional adapters** - Shell, Docker, or custom execution environments
+- ✅ **Test coverage improvements** - Help us maintain >80% coverage
+
+### What's NOT Part of Open Source
+
+Future phases (1-16) documented in design files are part of the **private SaaS roadmap** (AxonHub):
+- ❌ Frontend dashboard (Phase 10)
+- ❌ Stripe billing integration (Phase 11)
+- ❌ Webhook system (Phase 9)
+- ❌ Advanced enterprise features
+
+If you're interested in these features, consider the [Commercial License](COMMERCIAL_LICENSE.md) or building them in your own fork.
 
 ---
 

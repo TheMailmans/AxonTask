@@ -11,7 +11,7 @@
 
 AxonTask is a production-ready, open-source system that enables AI agents to start long-running background tasks, stream progress in real-time via Server-Sent Events (SSE), and resume reliably across session interruptions.
 
-**Status**: ✅ Phase 0 Complete - Foundation Ready - See [ROADMAP.md](ROADMAP.md) for detailed progress.
+**Status**: ✅ Phase 0 Complete - Foundation Ready
 
 ---
 
@@ -201,20 +201,21 @@ axontask/
 
 ---
 
-## Roadmap
+## Project Status
 
-AxonTask is being built in 16 phases with zero technical debt policy. See [ROADMAP.md](ROADMAP.md) for complete details.
+AxonTask Phase 0 (Foundation) is complete and production-ready:
 
-**Phase 0 (Foundation)**: ✅ COMPLETE
-- [x] Project structure and documentation
-- [x] Cargo workspace (3 crates: api, worker, shared)
-- [x] Docker Compose (PostgreSQL 15 + Redis 7)
-- [x] Database schema and migrations
-- [x] All models with full CRUD operations
-- [x] 177 tests passing (169 unit + 8 integration)
-- [x] Zero technical debt
+- ✅ Complete database layer with 11 tables and full CRUD operations
+- ✅ Authentication system (JWT + API keys)
+- ✅ Rate limiting and quota enforcement
+- ✅ Redis Streams infrastructure for durable event replay
+- ✅ Cargo workspace (3 crates: api, worker, shared)
+- ✅ Docker Compose development environment
+- ✅ 177 tests passing (169 unit + 8 integration)
+- ✅ Zero technical debt
+- ✅ Comprehensive documentation (13 files)
 
-**Next**: Ready for Phase 1 (Adapters & Execution) - Or transition to private SaaS repo
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to contribute bug fixes, documentation improvements, and community-requested features.
 
 ---
 
@@ -256,7 +257,7 @@ AxonTask is licensed under the **Business Source License 1.1 (BSL)**. See [LICEN
 - Reselling or white-labeling AxonTask
 
 **🔄 Future Open Source Conversion:**
-- On January 1, 2029 (4 years), this code converts to **Apache 2.0** license
+- On January 1, 2035 (10 years), this code converts to **Apache 2.0** license
 - Becomes fully open source and permissive
 
 ### Commercial Licensing

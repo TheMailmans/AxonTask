@@ -255,7 +255,7 @@ No. Contributors operate under the [CLA](CLA.md) and BSL. Only **deployers** of 
 
 ### What if AxonTask converts to Apache 2.0 on the Change Date?
 
-On January 1, 2029, AxonTask v0.x - v3.x (all versions before Change Date) convert to **Apache 2.0** and become fully open source. Your Commercial License remains valid for versions released after the Change Date.
+On January 1, 2035, AxonTask v0.x - v3.x (all versions before Change Date) convert to **Apache 2.0** and become fully open source. Your Commercial License remains valid for versions released after the Change Date.
 
 ### Can I negotiate pricing?
 

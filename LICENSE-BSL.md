@@ -41,7 +41,7 @@ The Effective Date of this License is **January 1, 2025**.
 
 ## Change Date
 
-The Change Date is **January 1, 2029** (four years from Effective Date).
+The Change Date is **January 1, 2035** (ten years from Effective Date).
 
 ---
 
