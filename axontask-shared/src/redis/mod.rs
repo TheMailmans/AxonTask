@@ -44,12 +44,16 @@
 /// ```
 
 pub mod client;
+pub mod gap_detection;
 pub mod heartbeat;
+pub mod metrics;
 pub mod stream_reader;
 pub mod stream_writer;
 
 // Re-export common types for convenience
 pub use client::{RedisClient, RedisClientError, RedisConfig, RedisStats};
+pub use gap_detection::{GapDetectionError, GapDetector, GapDetectorConfig, GapInfo};
 pub use heartbeat::{HeartbeatConfig, HeartbeatData, HeartbeatError, HeartbeatManager};
+pub use metrics::{EventRateStats, LagInfo, MetricsError, StreamInfo, StreamMetrics};
 pub use stream_reader::{StreamReader, StreamReaderConfig, StreamReaderError};
 pub use stream_writer::{StreamWriter, StreamWriterConfig, StreamWriterError};
