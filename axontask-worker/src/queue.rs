@@ -64,10 +64,10 @@ pub enum QueueError {
 /// Polls database for pending tasks and claims them for execution.
 pub struct TaskQueue {
     /// Database connection pool
-    db: PgPool,
+    pub db: PgPool,
 
     /// Maximum tasks to claim in one batch
-    batch_size: usize,
+    pub batch_size: usize,
 }
 
 impl TaskQueue {

@@ -46,6 +46,7 @@
 
 use axontask_shared::redis::RedisClient;
 use redis::AsyncCommands;
+use tokio_stream::StreamExt;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use tokio::task::JoinHandle;
@@ -200,7 +201,7 @@ impl ControlListener {
         let channel = control_channel(task_id);
         let payload = serde_json::to_string(&message)?;
 
-        let mut conn = self.redis.get_connection().await?;
+        let mut conn = self.redis.get_connection();
         let _: i32 = conn.publish(&channel, payload).await?;
 
         tracing::debug!(
@@ -233,7 +234,8 @@ async fn listen_loop(
 
     // Get pubsub connection
     let client = redis::Client::open(redis.url())?;
-    let mut pubsub = client.get_async_pubsub().await?;
+    let conn = client.get_async_connection().await?;
+    let mut pubsub = conn.into_pubsub();
 
     // Subscribe to control channel
     pubsub.subscribe(&channel).await?;

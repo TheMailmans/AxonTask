@@ -347,7 +347,7 @@ async fn execute_task(
     }
 
     // Start timeout enforcer
-    let timeout_enforcer = TimeoutEnforcer::from_task_timeout(task.timeout_seconds);
+    let timeout_enforcer = TimeoutEnforcer::from_task_timeout(Some(task.timeout_seconds));
     let timeout_handle = timeout_enforcer.enforce(task_id, cancel_token.clone());
 
     // Start control listener for cancellation

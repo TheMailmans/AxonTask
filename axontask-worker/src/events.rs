@@ -52,7 +52,8 @@
 
 use crate::adapters::{AdapterEvent, AdapterEventKind};
 use anyhow::{Context, Result};
-use axontask_shared::events::serialization::{event_stream_key, serialize_event, TaskEvent};
+use axontask_shared::events::serialization::{event_stream_key, serialize_event};
+use axontask_shared::models::task_event::TaskEvent;
 use axontask_shared::redis::RedisClient;
 use chrono::Utc;
 use redis::AsyncCommands;
@@ -150,6 +151,7 @@ impl EventEmitter {
 
         // Create task event
         let task_event = TaskEvent {
+            task_id,
             seq,
             kind: event.kind.to_string(),
             payload: event.payload,
@@ -173,10 +175,13 @@ impl EventEmitter {
 
         // Write to Redis Stream
         let stream_key = event_stream_key(task_id);
-        let mut conn = self.redis.get_connection().await?;
+        let mut conn = self.redis.get_connection();
+
+        // Convert HashMap to Vec of tuples for xadd
+        let items: Vec<(&str, &str)> = fields.iter().map(|(k, v)| (k.as_str(), v.as_str())).collect();
 
         let stream_id: String = conn
-            .xadd(&stream_key, "*", &fields)
+            .xadd(&stream_key, "*", &items)
             .await
             .context("Failed to write event to Redis Stream")?;
 
