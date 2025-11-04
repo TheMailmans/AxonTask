@@ -4,14 +4,14 @@
 
 [![License: BSL](https://img.shields.io/badge/License-BSL%201.1-blue.svg)](LICENSE-BSL.md)
 [![Rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg)](https://www.rust-lang.org/)
-[![Status](https://img.shields.io/badge/status-in%20development-yellow.svg)](https://github.com/TheMailmans/axontask)
+[![Status](https://img.shields.io/badge/status-phase%200%20complete-green.svg)](https://github.com/TheMailmans/AxonTask)
 [![Commercial License](https://img.shields.io/badge/Commercial-Available-green.svg)](COMMERCIAL_LICENSE.md)
 
 > **"Agents lie when they say 'I'll update you.' AxonTask makes that true."**
 
 AxonTask is a production-ready, open-source system that enables AI agents to start long-running background tasks, stream progress in real-time via Server-Sent Events (SSE), and resume reliably across session interruptions.
 
-**Status**: 🚧 Phase 0 (Foundation) - See [ROADMAP.md](ROADMAP.md) for detailed progress.
+**Status**: ✅ Phase 0 Complete - Foundation Ready - See [ROADMAP.md](ROADMAP.md) for detailed progress.
 
 ---
 
@@ -93,8 +93,8 @@ Execute tasks via multiple adapters:
 
 ```bash
 # Clone the repository
-git clone https://github.com/tylermailman/axontask.git
-cd axontask
+git clone https://github.com/TheMailmans/AxonTask.git
+cd AxonTask
 
 # Start development services
 docker-compose up -d
@@ -205,16 +205,16 @@ axontask/
 
 AxonTask is being built in 16 phases with zero technical debt policy. See [ROADMAP.md](ROADMAP.md) for complete details.
 
-**Current Status**: Phase 0 (Foundation)
-- [x] ROADMAP.md created
-- [x] CLAUDE.md created
-- [x] CONTRIBUTING.md created
-- [x] Cargo workspace structure
-- [x] Docker Compose setup
-- [ ] Database schema
-- [ ] CI/CD pipeline
+**Phase 0 (Foundation)**: ✅ COMPLETE
+- [x] Project structure and documentation
+- [x] Cargo workspace (3 crates: api, worker, shared)
+- [x] Docker Compose (PostgreSQL 15 + Redis 7)
+- [x] Database schema and migrations
+- [x] All models with full CRUD operations
+- [x] 177 tests passing (169 unit + 8 integration)
+- [x] Zero technical debt
 
-**Next**: Phase 1 (Core Data Layer) - Database models and migrations
+**Next**: Ready for Phase 1 (Adapters & Execution) - Or transition to private SaaS repo
 
 ---
 
@@ -276,8 +276,8 @@ See [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md) for complete details and pric
 ## Support
 
 - **Documentation**: See [docs/](docs/) and [CLAUDE.md](CLAUDE.md)
-- **Issues**: [GitHub Issues](https://github.com/tylermailman/axontask/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/tylermailman/axontask/discussions)
+- **Issues**: [GitHub Issues](https://github.com/TheMailmans/AxonTask/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/TheMailmans/AxonTask/discussions)
 
 ---
 

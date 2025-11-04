@@ -100,18 +100,23 @@ impl TimeoutEnforcer {
     /// * `timeout_seconds` - Timeout in seconds (None = default)
     pub fn from_task_timeout(timeout_seconds: Option<i32>) -> Self {
         let timeout = match timeout_seconds {
-            Some(secs) if secs > 0 => {
-                let duration = Duration::from_secs(secs as u64);
-                // Clamp to valid range
-                if duration < MIN_TIMEOUT {
+            Some(secs) => {
+                // Treat non-positive values as min timeout
+                if secs <= 0 {
                     MIN_TIMEOUT
-                } else if duration > MAX_TIMEOUT {
-                    MAX_TIMEOUT
                 } else {
-                    duration
+                    let duration = Duration::from_secs(secs as u64);
+                    // Clamp to valid range
+                    if duration < MIN_TIMEOUT {
+                        MIN_TIMEOUT
+                    } else if duration > MAX_TIMEOUT {
+                        MAX_TIMEOUT
+                    } else {
+                        duration
+                    }
                 }
             }
-            _ => DEFAULT_TIMEOUT,
+            None => DEFAULT_TIMEOUT,
         };
 
         TimeoutEnforcer::new(timeout)

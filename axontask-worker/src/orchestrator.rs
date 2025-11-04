@@ -403,11 +403,31 @@ async fn execute_task(
         Ok(()) => {
             // Check if cancelled or timed out
             if cancel_token.is_cancelled() {
-                // Check if timeout (vs manual cancellation)
-                // Note: We distinguish by checking if timeout was reached
-                // For now, we mark as cancelled; timeout handler sets error separately
-                tracing::info!(task_id = %task_id, "Task cancelled or timed out");
-                // Task state should already be updated by cancel/timeout handler
+                // Check if task exceeded timeout by looking at task duration
+                if let Ok(Some(current_task)) = Task::find_by_id(&queue.db, task_id).await {
+                    if let Some(started_at) = current_task.started_at {
+                        let elapsed = chrono::Utc::now()
+                            .signed_duration_since(started_at)
+                            .num_seconds();
+
+                        // If elapsed time exceeds timeout, mark as timeout
+                        if elapsed >= task.timeout_seconds as i64 {
+                            tracing::warn!(task_id = %task_id, elapsed, timeout = task.timeout_seconds, "Task timed out");
+                            queue.mark_timeout(task_id).await?;
+                        } else {
+                            // Manual cancellation
+                            tracing::info!(task_id = %task_id, "Task cancelled by user");
+                            queue.mark_failed(task_id, "Task cancelled by user".to_string()).await?;
+                        }
+                    } else {
+                        // No start time, treat as cancellation
+                        tracing::info!(task_id = %task_id, "Task cancelled");
+                        queue.mark_failed(task_id, "Task cancelled".to_string()).await?;
+                    }
+                } else {
+                    // Couldn't find task, treat as cancellation
+                    tracing::warn!(task_id = %task_id, "Task not found after cancellation");
+                }
             } else {
                 tracing::info!(task_id = %task_id, "Task succeeded");
                 queue.mark_succeeded(task_id, Some(0)).await?;

@@ -373,7 +373,7 @@ impl QuotaEnforcer {
             r#"
             SELECT COUNT(*)
             FROM tasks
-            WHERE tenant_id = $1 AND state = $2
+            WHERE tenant_id = $1 AND state = $2::task_state
             "#,
         )
         .bind(tenant_id)

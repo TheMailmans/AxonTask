@@ -44,7 +44,17 @@ async fn test_create_task() {
 
     let response = ctx.app.clone().call(request).await.unwrap();
 
-    assert_eq!(response.status(), StatusCode::OK);
+    // Debug: print response body if not OK
+    let status = response.status();
+    if status != StatusCode::OK {
+        let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+            .await
+            .unwrap();
+        let body_str = String::from_utf8_lossy(&body);
+        panic!("Expected 200 OK, got {}: {}", status, body_str);
+    }
+
+    assert_eq!(status, StatusCode::OK);
 
     // Parse response
     let body = axum::body::to_bytes(response.into_body(), usize::MAX)

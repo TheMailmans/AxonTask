@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **AxonTask** is a production-ready, open-source system for persistent background tasks with real-time streaming, designed for AI agents. It provides MCP-native tools that allow agents to start long-running tasks, stream progress in real-time via SSE, and resume reliably across session interruptions.
 
-**Status**: 🚧 Phase 4 (Redis Integration) - Starting next
+**Status**: ✅ Phase 0 Complete - Foundation Ready for Contributors
 
 **Key Features**:
 - Persistent task execution (survives restarts/crashes)
@@ -50,7 +50,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Initial Setup
 ```bash
 # Clone and enter repository
-cd /Users/tylermailman/Documents/Projects/AxonTask
+git clone https://github.com/TheMailmans/AxonTask.git
+cd AxonTask
 
 # Start development services (Postgres + Redis)
 docker-compose up -d

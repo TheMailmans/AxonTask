@@ -128,14 +128,14 @@ impl TaskQueue {
             WITH pending_tasks AS (
                 SELECT id
                 FROM tasks
-                WHERE state = $1
+                WHERE state = $1::task_state
                 ORDER BY created_at ASC
                 LIMIT $2
                 FOR UPDATE SKIP LOCKED
             )
             UPDATE tasks
             SET
-                state = $3,
+                state = $3::task_state,
                 started_at = NOW(),
                 updated_at = NOW()
             FROM pending_tasks
@@ -143,19 +143,21 @@ impl TaskQueue {
             RETURNING
                 tasks.id,
                 tasks.tenant_id,
+                tasks.created_by,
                 tasks.name,
                 tasks.adapter,
                 tasks.args,
                 tasks.state,
-                tasks.timeout_seconds,
-                tasks.tags,
-                tasks.created_at,
                 tasks.started_at,
                 tasks.ended_at,
-                tasks.last_seq,
-                tasks.last_event_id,
+                tasks.cursor,
+                tasks.bytes_streamed,
+                tasks.minutes_used,
+                tasks.timeout_seconds,
+                tasks.error_message,
                 tasks.exit_code,
-                tasks.error
+                tasks.created_at,
+                tasks.updated_at
             "#,
         )
         .bind(TaskState::Pending.as_str())
@@ -187,7 +189,7 @@ impl TaskQueue {
             r#"
             SELECT COUNT(*)
             FROM tasks
-            WHERE state = $1
+            WHERE state = $1::task_state
             "#,
         )
         .bind(TaskState::Pending.as_str())
@@ -213,7 +215,7 @@ impl TaskQueue {
             r#"
             SELECT COUNT(*)
             FROM tasks
-            WHERE state = $1
+            WHERE state = $1::task_state
             "#,
         )
         .bind(TaskState::Running.as_str())
@@ -238,11 +240,11 @@ impl TaskQueue {
             r#"
             UPDATE tasks
             SET
-                state = $2,
+                state = $2::task_state,
                 ended_at = NOW(),
                 updated_at = NOW(),
                 exit_code = $3
-            WHERE id = $1 AND state = $4
+            WHERE id = $1 AND state = $4::task_state
             "#,
         )
         .bind(task_id)
@@ -275,11 +277,11 @@ impl TaskQueue {
             r#"
             UPDATE tasks
             SET
-                state = $2,
+                state = $2::task_state,
                 ended_at = NOW(),
                 updated_at = NOW(),
-                error = $3
-            WHERE id = $1 AND state = $4
+                error_message = $3
+            WHERE id = $1 AND state = $4::task_state
             "#,
         )
         .bind(task_id)
@@ -311,11 +313,11 @@ impl TaskQueue {
             r#"
             UPDATE tasks
             SET
-                state = $2,
+                state = $2::task_state,
                 ended_at = NOW(),
                 updated_at = NOW(),
-                error = 'Task timed out'
-            WHERE id = $1 AND state = $4
+                error_message = 'Task timed out'
+            WHERE id = $1 AND state = $3::task_state
             "#,
         )
         .bind(task_id)
