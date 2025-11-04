@@ -18,9 +18,10 @@
 /// # }
 /// ```
 
-use crate::config::Config;
+use crate::{config::Config, middleware::security::SecurityHeadersLayer};
 use axum::{
     extract::Request,
+    http::{header, HeaderValue, Method},
     middleware::Next,
     response::Response,
     routing::{get, post},
@@ -138,7 +139,35 @@ pub fn build_router(state: AppState) -> Router {
         .nest("/auth", auth_routes)
         .nest("/api-keys", api_key_routes);
 
-    // Combine all routes
+    // Configure CORS based on environment
+    let cors = if state.config.api.cors_origins.contains(&"*".to_string()) {
+        // Development mode: permissive CORS
+        CorsLayer::permissive()
+    } else {
+        // Production mode: configure allowed origins
+        let origins: Vec<HeaderValue> = state
+            .config
+            .api
+            .cors_origins
+            .iter()
+            .filter_map(|origin| origin.parse().ok())
+            .collect();
+
+        CorsLayer::new()
+            .allow_origin(origins)
+            .allow_methods([
+                Method::GET,
+                Method::POST,
+                Method::PUT,
+                Method::DELETE,
+                Method::OPTIONS,
+            ])
+            .allow_headers([header::AUTHORIZATION, header::CONTENT_TYPE])
+            .allow_credentials(true)
+            .max_age(std::time::Duration::from_secs(3600))
+    };
+
+    // Combine all routes with middleware stack
     Router::new()
         .merge(health_routes)
         .nest("/v1", v1_routes)
@@ -147,7 +176,8 @@ pub fn build_router(state: AppState) -> Router {
                 .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
                 .on_response(DefaultOnResponse::new().level(Level::INFO)),
         )
-        .layer(CorsLayer::permissive()) // TODO: Configure CORS properly for production
+        .layer(cors)
+        .layer(SecurityHeadersLayer::new(state.config.api.production))
         .with_state(state)
 }
 

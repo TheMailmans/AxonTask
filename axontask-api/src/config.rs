@@ -47,6 +47,12 @@ pub struct ApiConfig {
 
     /// Port to bind to
     pub port: u16,
+
+    /// Whether running in production mode
+    pub production: bool,
+
+    /// Allowed CORS origins (comma-separated)
+    pub cors_origins: Vec<String>,
 }
 
 /// Database configuration
@@ -97,6 +103,18 @@ impl Config {
             .unwrap_or_else(|_| "8080".to_string())
             .parse::<u16>()?;
 
+        let production = env::var("PRODUCTION")
+            .unwrap_or_else(|_| "false".to_string())
+            .parse::<bool>()
+            .unwrap_or(false);
+
+        let cors_origins = env::var("CORS_ORIGINS")
+            .unwrap_or_else(|_| "*".to_string())
+            .split(',')
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty())
+            .collect();
+
         let database_url = env::var("DATABASE_URL")
             .map_err(|_| anyhow::anyhow!("DATABASE_URL environment variable is required"))?;
 
@@ -115,6 +133,8 @@ impl Config {
             api: ApiConfig {
                 host: api_host,
                 port: api_port,
+                production,
+                cors_origins,
             },
             database: DatabaseConfig {
                 url: database_url,
@@ -142,6 +162,8 @@ mod tests {
             api: ApiConfig {
                 host: "127.0.0.1".to_string(),
                 port: 8080,
+                production: false,
+                cors_origins: vec!["*".to_string()],
             },
             database: DatabaseConfig {
                 url: "postgresql://localhost/test".to_string(),
