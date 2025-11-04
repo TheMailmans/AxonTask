@@ -18,6 +18,8 @@ axontask-shared = { path = "../axontask-shared" }
 # Async
 tokio = { workspace = true }
 tokio-stream = { workspace = true }
+tokio-util = { workspace = true }
+async-trait = { workspace = true }
 futures = { workspace = true }
 
 # Database
