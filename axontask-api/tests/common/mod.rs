@@ -9,7 +9,8 @@
 
 use axontask_api::app::{build_router, AppState};
 use axontask_api::config::Config;
-use axontask_shared::auth::jwt::generate_access_token;
+use axontask_shared::auth::jwt::{Claims, TokenType, create_token};
+use axontask_shared::models::membership::{CreateMembership, Membership, MembershipRole};
 use axontask_shared::models::tenant::{CreateTenant, Tenant, TenantPlan};
 use axontask_shared::models::user::{CreateUser, User};
 use axontask_shared::redis::{RedisClient, RedisConfig};
@@ -37,8 +38,8 @@ impl TestContext {
         // Connect to database
         let db = PgPool::connect(&config.database.url).await?;
 
-        // Run migrations
-        sqlx::migrate!("../../migrations").run(&db).await?;
+        // Run migrations (path relative to Cargo.toml, not this file)
+        sqlx::migrate!("../migrations").run(&db).await?;
 
         // Connect to Redis
         let redis_config = RedisConfig::from_env()?;
@@ -60,13 +61,26 @@ impl TestContext {
             CreateUser {
                 email: format!("test-{}@example.com", Uuid::new_v4()),
                 password_hash: "test_hash".to_string(), // Not used in tests
+                name: Some("Test User".to_string()),
+                avatar_url: None,
+            },
+        )
+        .await?;
+
+        // Create membership
+        Membership::create(
+            &db,
+            CreateMembership {
                 tenant_id: tenant.id,
+                user_id: user.id,
+                role: MembershipRole::Owner,
             },
         )
         .await?;
 
         // Generate JWT token
-        let jwt_token = generate_access_token(user.id, tenant.id, &config.jwt.secret)?;
+        let claims = Claims::new(user.id, tenant.id, TokenType::Access);
+        let jwt_token = create_token(&claims, &config.jwt.secret)?;
 
         // Build app
         let state = AppState::new(db.clone(), config.clone());
@@ -109,11 +123,11 @@ pub async fn create_test_task(
         &ctx.db,
         CreateTask {
             tenant_id: ctx.tenant.id,
+            created_by: Some(ctx.user.id),
             name: name.to_string(),
             adapter: adapter.to_string(),
             args,
-            timeout_seconds: Some(60),
-            tags: None,
+            timeout_seconds: 60,
         },
     )
     .await?;

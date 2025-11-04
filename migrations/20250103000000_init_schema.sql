@@ -373,12 +373,8 @@ COMMENT ON COLUMN usage_counters.streams IS 'Total SSE stream connections';
 COMMENT ON COLUMN usage_counters.bytes IS 'Total bytes streamed via SSE';
 COMMENT ON COLUMN usage_counters.tasks_created IS 'Total tasks created';
 
--- Index for querying usage by tenant and period
+-- Index for querying usage by tenant and period (optimized for current period lookups)
 CREATE INDEX idx_usage_counters_tenant_period ON usage_counters(tenant_id, period DESC);
-
--- Index for current period lookups
-CREATE INDEX idx_usage_counters_current ON usage_counters(tenant_id, period)
-    WHERE period = CURRENT_DATE;
 
 -- ==============================================================================
 -- SUMMARY
@@ -398,7 +394,7 @@ CREATE INDEX idx_usage_counters_current ON usage_counters(tenant_id, period)
 --   - membership_role (owner, admin, member, viewer)
 --   - task_state (pending, running, succeeded, failed, canceled, timeout)
 --
--- Indexes created: 29
+-- Indexes created: 28
 --   - Performance indexes on tenant_id, foreign keys, common queries
 --   - Partial indexes for filtered queries (active webhooks, running tasks, etc.)
 --   - GIN index for array containment (webhook events)

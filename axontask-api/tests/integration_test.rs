@@ -16,7 +16,7 @@ use axum::body::Body;
 use axum::http::{Request, StatusCode};
 use common::TestContext;
 use serde_json::json;
-use tower::ServiceExt;
+use tower::Service as _;
 
 /// Test that we can create a task via the API
 #[tokio::test]
@@ -42,7 +42,7 @@ async fn test_create_task() {
         ))
         .unwrap();
 
-    let response = ctx.app.clone().oneshot(request).await.unwrap();
+    let response = ctx.app.clone().call(request).await.unwrap();
 
     assert_eq!(response.status(), StatusCode::OK);
 
@@ -96,7 +96,7 @@ async fn test_full_task_lifecycle() {
     common::wait_for(
         || async {
             let task = Task::find_by_id(&ctx.db, task_id).await.unwrap().unwrap();
-            task.state == TaskState::Running || task.state == TaskState::Succeeded
+            task.state == TaskState::Running.as_str() || task.state == TaskState::Succeeded.as_str()
         },
         10,
     )
@@ -107,7 +107,7 @@ async fn test_full_task_lifecycle() {
     common::wait_for(
         || async {
             let task = Task::find_by_id(&ctx.db, task_id).await.unwrap().unwrap();
-            task.state == TaskState::Succeeded
+            task.state == TaskState::Succeeded.as_str()
         },
         10,
     )
@@ -116,7 +116,7 @@ async fn test_full_task_lifecycle() {
 
     // Verify final state
     let task = Task::find_by_id(&ctx.db, task_id).await.unwrap().unwrap();
-    assert_eq!(task.state, TaskState::Succeeded);
+    assert_eq!(task.state, TaskState::Succeeded.as_str());
     assert!(task.started_at.is_some());
     assert!(task.ended_at.is_some());
 
@@ -160,7 +160,7 @@ async fn test_task_cancellation() {
     common::wait_for(
         || async {
             let task = Task::find_by_id(&ctx.db, task_id).await.unwrap().unwrap();
-            task.state == TaskState::Running
+            task.state == TaskState::Running.as_str()
         },
         10,
     )
@@ -175,14 +175,14 @@ async fn test_task_cancellation() {
         .body(Body::empty())
         .unwrap();
 
-    let response = ctx.app.clone().oneshot(request).await.unwrap();
+    let response = ctx.app.clone().call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
 
     // Wait for task to be cancelled
     common::wait_for(
         || async {
             let task = Task::find_by_id(&ctx.db, task_id).await.unwrap().unwrap();
-            task.state == TaskState::Canceled
+            task.state == TaskState::Canceled.as_str()
         },
         10,
     )
@@ -191,7 +191,7 @@ async fn test_task_cancellation() {
 
     // Verify cancelled state
     let task = Task::find_by_id(&ctx.db, task_id).await.unwrap().unwrap();
-    assert_eq!(task.state, TaskState::Canceled);
+    assert_eq!(task.state, TaskState::Canceled.as_str());
 
     // Shutdown worker
     shutdown_token.cancel();
@@ -221,14 +221,14 @@ async fn test_timeout_enforcement() {
         &ctx.db,
         axontask_shared::models::task::CreateTask {
             tenant_id: ctx.tenant.id,
+            created_by: Some(ctx.user.id),
             name: "timeout-test".to_string(),
             adapter: "mock".to_string(),
             args: json!({
                 "duration_ms": 10000, // 10 seconds
                 "should_fail": false
             }),
-            timeout_seconds: Some(2), // 2 second timeout
-            tags: None,
+            timeout_seconds: 2, // 2 second timeout
         },
     )
     .await
@@ -238,7 +238,7 @@ async fn test_timeout_enforcement() {
     common::wait_for(
         || async {
             let t = Task::find_by_id(&ctx.db, task.id).await.unwrap().unwrap();
-            t.state == TaskState::Running
+            t.state == TaskState::Running.as_str()
         },
         10,
     )
@@ -249,7 +249,7 @@ async fn test_timeout_enforcement() {
     common::wait_for(
         || async {
             let t = Task::find_by_id(&ctx.db, task.id).await.unwrap().unwrap();
-            t.state == TaskState::Timeout || t.state == TaskState::Canceled
+            t.state == TaskState::Timeout.as_str() || t.state == TaskState::Canceled.as_str()
         },
         15,
     )
@@ -259,7 +259,7 @@ async fn test_timeout_enforcement() {
     // Verify timeout/cancelled state
     let task = Task::find_by_id(&ctx.db, task.id).await.unwrap().unwrap();
     assert!(
-        task.state == TaskState::Timeout || task.state == TaskState::Canceled,
+        task.state == TaskState::Timeout.as_str() || task.state == TaskState::Canceled.as_str(),
         "Expected timeout or cancelled, got {:?}",
         task.state
     );
@@ -298,7 +298,7 @@ async fn test_rate_limiting() {
         ))
         .unwrap();
 
-    let response = ctx.app.clone().oneshot(request).await.unwrap();
+    let response = ctx.app.clone().call(request).await.unwrap();
 
     // Verify rate limit headers are present
     assert!(response.headers().contains_key("x-ratelimit-limit"));
@@ -330,7 +330,7 @@ async fn test_quota_enforcement() {
         ))
         .unwrap();
 
-    let response = ctx.app.clone().oneshot(request).await.unwrap();
+    let response = ctx.app.clone().call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
 
     ctx.cleanup().await.unwrap();
@@ -356,7 +356,7 @@ async fn test_authentication_required() {
         ))
         .unwrap();
 
-    let response = ctx.app.clone().oneshot(request).await.unwrap();
+    let response = ctx.app.clone().call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
 
     ctx.cleanup().await.unwrap();
@@ -385,7 +385,7 @@ async fn test_get_task_status() {
         .body(Body::empty())
         .unwrap();
 
-    let response = ctx.app.clone().oneshot(request).await.unwrap();
+    let response = ctx.app.clone().call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
 
     // Parse response
