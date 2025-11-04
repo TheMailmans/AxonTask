@@ -40,8 +40,10 @@
 /// ```
 
 use crate::adapters::{Adapter, AdapterContext, AdapterEvent, MockAdapter};
+use crate::control::ControlListener;
 use crate::events::EventEmitter;
 use crate::queue::TaskQueue;
+use crate::timeout::TimeoutEnforcer;
 use axontask_shared::models::task::Task;
 use axontask_shared::redis::RedisClient;
 use sqlx::PgPool;
@@ -86,6 +88,9 @@ pub struct WorkerOrchestrator {
     /// Event emitter
     emitter: Arc<EventEmitter>,
 
+    /// Redis client
+    redis: RedisClient,
+
     /// Configuration
     config: OrchestratorConfig,
 
@@ -105,7 +110,7 @@ impl WorkerOrchestrator {
     /// * `redis` - Redis client
     pub fn new(db: PgPool, redis: RedisClient) -> Self {
         let queue = TaskQueue::new(db);
-        let emitter = Arc::new(EventEmitter::new(redis));
+        let emitter = Arc::new(EventEmitter::new(redis.clone()));
         let config = OrchestratorConfig::default();
 
         // Initialize adapter registry
@@ -115,6 +120,7 @@ impl WorkerOrchestrator {
         WorkerOrchestrator {
             queue,
             emitter,
+            redis,
             config,
             adapters,
             shutdown_token: CancellationToken::new(),
@@ -130,7 +136,7 @@ impl WorkerOrchestrator {
     /// * `config` - Orchestrator configuration
     pub fn with_config(db: PgPool, redis: RedisClient, config: OrchestratorConfig) -> Self {
         let queue = TaskQueue::with_batch_size(db, config.batch_size);
-        let emitter = Arc::new(EventEmitter::new(redis));
+        let emitter = Arc::new(EventEmitter::new(redis.clone()));
 
         // Initialize adapter registry
         let mut adapters: HashMap<String, Arc<dyn Adapter>> = HashMap::new();
@@ -139,6 +145,7 @@ impl WorkerOrchestrator {
         WorkerOrchestrator {
             queue,
             emitter,
+            redis,
             config,
             adapters,
             shutdown_token: CancellationToken::new(),
@@ -282,10 +289,11 @@ impl WorkerOrchestrator {
 
         let emitter = self.emitter.clone();
         let queue = self.queue.clone();
+        let redis = self.redis.clone();
 
         // Spawn task execution
         tokio::spawn(async move {
-            if let Err(e) = execute_task(task, adapter, emitter, queue, cancel_token).await {
+            if let Err(e) = execute_task(task, adapter, emitter, queue, redis, cancel_token).await {
                 tracing::error!(error = %e, "Task execution failed");
             }
         });
@@ -307,14 +315,17 @@ impl Clone for TaskQueue {
 /// This function runs in its own Tokio task and handles the full lifecycle:
 /// 1. Validate adapter arguments
 /// 2. Create event channel
-/// 3. Execute adapter
-/// 4. Emit events to Redis
-/// 5. Update task status
+/// 3. Start timeout enforcer
+/// 4. Start control listener
+/// 5. Execute adapter
+/// 6. Emit events to Redis
+/// 7. Update task status
 async fn execute_task(
     task: Task,
     adapter: Arc<dyn Adapter>,
     emitter: Arc<EventEmitter>,
     queue: TaskQueue,
+    redis: RedisClient,
     cancel_token: CancellationToken,
 ) -> anyhow::Result<()> {
     let task_id = task.id;
@@ -334,6 +345,14 @@ async fn execute_task(
             .await?;
         return Ok(());
     }
+
+    // Start timeout enforcer
+    let timeout_enforcer = TimeoutEnforcer::from_task_timeout(task.timeout_seconds);
+    let timeout_handle = timeout_enforcer.enforce(task_id, cancel_token.clone());
+
+    // Start control listener for cancellation
+    let control_listener = ControlListener::new(redis);
+    let control_handle = control_listener.listen(task_id, cancel_token.clone()).await?;
 
     // Create event channel
     let (event_tx, mut event_rx) = mpsc::unbounded_channel();
@@ -371,6 +390,10 @@ async fn execute_task(
     // Wait for adapter to complete
     let adapter_result = adapter_handle.await?;
 
+    // Stop timeout and control listeners
+    timeout_handle.abort();
+    control_handle.abort();
+
     // Wait for all events to be emitted
     drop(event_handle); // Close event channel
     sleep(Duration::from_millis(100)).await; // Give time for final events
@@ -378,10 +401,13 @@ async fn execute_task(
     // Update task status based on result
     match adapter_result {
         Ok(()) => {
-            // Check if cancelled
+            // Check if cancelled or timed out
             if cancel_token.is_cancelled() {
-                tracing::info!(task_id = %task_id, "Task cancelled");
-                // Task state should already be updated by cancel handler
+                // Check if timeout (vs manual cancellation)
+                // Note: We distinguish by checking if timeout was reached
+                // For now, we mark as cancelled; timeout handler sets error separately
+                tracing::info!(task_id = %task_id, "Task cancelled or timed out");
+                // Task state should already be updated by cancel/timeout handler
             } else {
                 tracing::info!(task_id = %task_id, "Task succeeded");
                 queue.mark_succeeded(task_id, Some(0)).await?;

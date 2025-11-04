@@ -294,6 +294,14 @@ impl RedisClient {
         &self.config
     }
 
+    /// Gets the Redis URL
+    ///
+    /// Returns the full Redis connection URL including credentials.
+    /// Use sanitize_url() for logging.
+    pub fn url(&self) -> &str {
+        &self.config.url
+    }
+
     /// Gets connection statistics
     ///
     /// Returns a summary of the current connection state.
