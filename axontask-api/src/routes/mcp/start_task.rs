@@ -43,6 +43,7 @@ use crate::app::AppState;
 use crate::error::ApiError;
 use axontask_shared::auth::middleware::AuthContext;
 use axontask_shared::models::task::{CreateTask, Task, TaskState};
+use axontask_shared::quota::{QuotaEnforcer, QuotaError, QuotaType};
 use axum::{extract::State, Extension, Json};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -168,8 +169,58 @@ pub async fn start_task(
     );
 
     // TODO: Validate adapter type against whitelist
-    // TODO: Check tenant quotas (concurrent tasks, daily tasks)
     // TODO: Check plan-specific adapter access
+
+    // Check quota limits before creating task
+    let enforcer = QuotaEnforcer::new(state.db.clone());
+
+    // Check concurrent tasks quota
+    enforcer
+        .enforce(auth.tenant_id, QuotaType::ConcurrentTasks)
+        .await
+        .map_err(|e| match e {
+            QuotaError::LimitExceeded {
+                quota_type,
+                limit,
+                current,
+            } => ApiError::Forbidden(format!(
+                "{} limit exceeded ({}/{}). Upgrade your plan for higher limits.",
+                quota_type.as_str(),
+                current,
+                limit
+            )),
+            QuotaError::TenantNotFound(_) => {
+                ApiError::Unauthorized("Tenant not found".to_string())
+            }
+            QuotaError::DatabaseError(err) => {
+                tracing::error!(error = %err, "Quota check failed");
+                ApiError::InternalError("Failed to check quotas".to_string())
+            }
+        })?;
+
+    // Check daily tasks quota
+    enforcer
+        .enforce(auth.tenant_id, QuotaType::DailyTasks)
+        .await
+        .map_err(|e| match e {
+            QuotaError::LimitExceeded {
+                quota_type,
+                limit,
+                current,
+            } => ApiError::Forbidden(format!(
+                "{} limit exceeded ({}/{}). Upgrade your plan for higher limits.",
+                quota_type.as_str(),
+                current,
+                limit
+            )),
+            QuotaError::TenantNotFound(_) => {
+                ApiError::Unauthorized("Tenant not found".to_string())
+            }
+            QuotaError::DatabaseError(err) => {
+                tracing::error!(error = %err, "Quota check failed");
+                ApiError::InternalError("Failed to check quotas".to_string())
+            }
+        })?;
 
     // Create task in database
     let create_task = CreateTask {

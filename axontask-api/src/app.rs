@@ -134,13 +134,17 @@ pub fn build_router(state: AppState) -> Router {
             jwt_auth_layer,
         ));
 
-    // MCP tool routes (require JWT or API key authentication)
+    // MCP tool routes (require JWT or API key authentication + rate limiting)
     let mcp_routes = Router::new()
         .route("/start_task", post(routes::mcp::start_task))
         .route("/tasks/:task_id/status", get(routes::mcp::get_task_status))
         .route("/tasks/:task_id/cancel", post(routes::mcp::cancel_task))
         .route("/tasks/:task_id/stream", get(routes::mcp::stream_task))
         .route("/tasks/:task_id/resume", post(routes::mcp::resume_task))
+        .layer(axum::middleware::from_fn_with_state(
+            state.clone(),
+            crate::middleware::rate_limit::rate_limit_layer,
+        ))
         .layer(axum::middleware::from_fn_with_state(
             state.clone(),
             jwt_auth_layer,

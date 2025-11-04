@@ -51,7 +51,10 @@ pub enum ApiError {
     ValidationError(Vec<ValidationErrorDetail>),
 
     /// Too many requests (429)
-    RateLimitExceeded(String),
+    RateLimitExceeded {
+        retry_after: u64,
+        message: String,
+    },
 
     /// Internal server error (500)
     InternalError(String),
@@ -95,7 +98,7 @@ impl fmt::Display for ApiError {
             ApiError::ValidationError(errors) => {
                 write!(f, "Validation failed: {} errors", errors.len())
             }
-            ApiError::RateLimitExceeded(msg) => write!(f, "Rate limit exceeded: {}", msg),
+            ApiError::RateLimitExceeded { message, .. } => write!(f, "Rate limit exceeded: {}", message),
             ApiError::InternalError(msg) => write!(f, "Internal error: {}", msg),
             ApiError::ServiceUnavailable(msg) => write!(f, "Service unavailable: {}", msg),
         }
@@ -106,6 +109,22 @@ impl std::error::Error for ApiError {}
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
+        // Handle rate limit separately to add Retry-After header
+        if let ApiError::RateLimitExceeded { retry_after, message } = &self {
+            let body = Json(ErrorResponse {
+                error: "rate_limit_exceeded".to_string(),
+                message: message.clone(),
+                details: None,
+            });
+
+            let mut response = (StatusCode::TOO_MANY_REQUESTS, body).into_response();
+            response.headers_mut().insert(
+                "Retry-After",
+                axum::http::HeaderValue::from_str(&retry_after.to_string()).unwrap(),
+            );
+            return response;
+        }
+
         let (status, error_code, message, details) = match self {
             ApiError::BadRequest(msg) => (
                 StatusCode::BAD_REQUEST,
@@ -143,10 +162,10 @@ impl IntoResponse for ApiError {
                 "Request validation failed".to_string(),
                 Some(errors),
             ),
-            ApiError::RateLimitExceeded(msg) => (
+            ApiError::RateLimitExceeded { message, .. } => (
                 StatusCode::TOO_MANY_REQUESTS,
                 "rate_limit_exceeded",
-                msg,
+                message,
                 None,
             ),
             ApiError::InternalError(msg) => {

@@ -20,6 +20,7 @@ pub mod events; // Phase 4: Event serialization
 // pub mod error;
 // pub mod integrity;
 pub mod models; // Phase 1: Database models
+pub mod quota; // Phase 5: Quota enforcement
 pub mod redis; // Phase 4: Redis Streams Infrastructure
 
 /// Current version of the AxonTask shared library

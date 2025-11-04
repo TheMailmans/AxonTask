@@ -3,6 +3,7 @@
 /// This module contains custom middleware for:
 /// - Security headers
 /// - Request logging enhancements
-/// - Rate limiting (future)
+/// - Rate limiting
 
+pub mod rate_limit;
 pub mod security;
