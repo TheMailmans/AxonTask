@@ -225,15 +225,11 @@ pub async fn start_task(
     // Create task in database
     let create_task = CreateTask {
         tenant_id: auth.tenant_id,
+        created_by: auth.user_id,
         name: request.name.clone(),
         adapter: request.adapter.clone(),
         args: request.args.clone(),
         timeout_seconds: request.timeout_s,
-        tags: if request.tags.is_empty() {
-            None
-        } else {
-            Some(request.tags.clone())
-        },
     };
 
     let task = Task::create(&state.db, create_task).await.map_err(|e| {
