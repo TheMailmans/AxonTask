@@ -156,9 +156,23 @@ pub async fn start_task(
     Json(request): Json<StartTaskRequest>,
 ) -> Result<Json<StartTaskResponse>, ApiError> {
     // Validate request
-    request
-        .validate()
-        .map_err(|e| ApiError::ValidationError(e.into()))?;
+    request.validate().map_err(|e| {
+        let errors = e
+            .field_errors()
+            .iter()
+            .flat_map(|(field, errors)| {
+                errors.iter().map(move |err| {
+                    crate::error::ValidationErrorDetail {
+                        field: field.to_string(),
+                        message: err.message.as_ref()
+                            .map(|m| m.to_string())
+                            .unwrap_or_else(|| format!("Validation failed for {}", field)),
+                    }
+                })
+            })
+            .collect();
+        ApiError::ValidationError(errors)
+    })?;
 
     tracing::info!(
         tenant_id = %auth.tenant_id,

@@ -176,7 +176,7 @@ pub async fn get_task_status(
     let task_minutes = duration_ms.map(|ms| ms as f64 / 60000.0);
 
     // Build metrics
-    let metrics = if duration_ms.is_some() || task.bytes_streamed.is_some() {
+    let metrics = if duration_ms.is_some() || task.bytes_streamed > 0 {
         Some(TaskMetrics {
             duration_ms,
             bytes_streamed: task.bytes_streamed,
@@ -190,11 +190,11 @@ pub async fn get_task_status(
     let response = TaskStatusResponse {
         task_id: task.id,
         name: task.name,
-        state: task.state.as_str().to_string(),
+        state: task.state.clone(),
         created_at: task.created_at,
         started_at: task.started_at,
         ended_at: task.ended_at,
-        last_seq: task.last_seq,
+        last_seq: task.cursor,
         metrics,
         error: task.error_message,
     };

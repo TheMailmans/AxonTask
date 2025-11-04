@@ -152,6 +152,10 @@ pub async fn cancel_task(
             ApiError::InternalError("Failed to cancel task".to_string())
         })?;
 
+    let task_state = updated_task
+        .map(|t| t.state.clone())
+        .unwrap_or_else(|| "pending".to_string());
+
     tracing::info!(
         task_id = %task_id,
         tenant_id = %auth.tenant_id,
@@ -161,7 +165,7 @@ pub async fn cancel_task(
     Ok(Json(CancelTaskResponse {
         task_id,
         canceled: true,
-        state: updated_task.state.as_str().to_string(),
+        state: task_state,
         message: "Task cancellation requested".to_string(),
     }))
 }
