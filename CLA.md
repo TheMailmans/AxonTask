@@ -133,7 +133,7 @@ If you are contributing on behalf of your employer, please:
 
 1. **Download the Corporate CLA**: [CORPORATE_CLA.md](CORPORATE_CLA.md) (coming soon)
 2. **Have an authorized signatory sign it**
-3. **Email the signed CLA** to tyler@axonhub.io
+3. **Email the signed CLA** to themailmaninbox@gmail.com
 4. **Proceed with contributions** once confirmed
 
 ---
@@ -194,7 +194,7 @@ Even after assigning copyright, you retain:
 
 If you have questions about the CLA:
 
-- **Email**: tyler@axonhub.io
+- **Email**: themailmaninbox@gmail.com
 - **GitHub Discussions**: https://github.com/TheMailmans/AxonTask/discussions
 - **FAQ**: See [CLA_FAQ.md](CLA_FAQ.md) (coming soon)
 
@@ -210,7 +210,7 @@ Thank you for contributing to AxonTask! 🚀
 
 ---
 
-**License Contact**: Tyler Mailman - tyler@axonhub.io
+**License Contact**: Tyler Mailman - themailmaninbox@gmail.com
 **Project**: AxonTask (https://github.com/TheMailmans/AxonTask)
 **CLA Version**: 1.0
 **Last Updated**: January 3, 2025

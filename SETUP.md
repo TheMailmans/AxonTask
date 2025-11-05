@@ -551,7 +551,7 @@ sudo journalctl -u caddy -f
 - **Documentation**: See all `.md` files in repo
 - **Issues**: [GitHub Issues](https://github.com/TheMailmans/AxonTask/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/TheMailmans/AxonTask/discussions)
-- **Email**: tyler@axonhub.io
+- **Email**: themailmaninbox@gmail.com
 
 ---
 

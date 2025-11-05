@@ -270,7 +270,7 @@ Need a commercial license? We offer three tiers:
 
 See [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md) for complete details and pricing.
 
-**Contact**: tyler@axonhub.io for commercial licensing inquiries.
+**Contact**: themailmaninbox@gmail.com for commercial licensing inquiries.
 
 ---
 

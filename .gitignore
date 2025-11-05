@@ -53,3 +53,4 @@ out/
 # Docker
 docker-compose.override.yml
 OPEN_SOURCE_AUDIT_REPORT.md
+WARP.md

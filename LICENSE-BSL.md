@@ -60,7 +60,7 @@ Full text available at: https://www.apache.org/licenses/LICENSE-2.0
 If you wish to use the Licensed Work for a Prohibited Purpose, you must obtain a **Commercial License** from the Licensor.
 
 To purchase a Commercial License, contact:
-- **Email**: tyler@axonhub.io
+- **Email**: themailmaninbox@gmail.com
 - **Website**: https://axontask.dev/commercial (coming soon)
 
 Commercial License terms, pricing, and SLA are available separately. See [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md) for details.
@@ -118,7 +118,7 @@ This License shall be governed by and construed in accordance with the laws of [
 
 For questions about this License or to request a Commercial License:
 
-- **Email**: tyler@axonhub.io
+- **Email**: themailmaninbox@gmail.com
 - **GitHub**: https://github.com/TheMailmans/AxonTask
 - **Discussions**: https://github.com/TheMailmans/AxonTask/discussions
 

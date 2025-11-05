@@ -201,7 +201,7 @@ Review the tiers above and select the one that fits your needs.
 
 Reach out to start the license process:
 
-- **Email**: tyler@axonhub.io
+- **Email**: themailmaninbox@gmail.com
 - **Website**: https://axontask.dev/commercial (coming soon)
 - **Phone**: [To be added]
 - **Calendly**: [Schedule a call - to be added]
@@ -323,7 +323,7 @@ This license is governed by [Your State/Country] law.
 
 For any questions about Commercial Licensing:
 
-- **Sales Email**: tyler@axonhub.io
+- **Sales Email**: themailmaninbox@gmail.com
 - **GitHub Discussions**: https://github.com/TheMailmans/AxonTask/discussions
 - **Website**: https://axontask.dev (coming soon)
 

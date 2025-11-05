@@ -971,4 +971,4 @@ This API design provides a complete, production-ready specification for all Axon
 
 **Document Version**: 1.0
 **Last Updated**: November 04, 2025
-**Maintained By**: Tyler Mailman (tyler@axonhub.io)
+**Maintained By**: Tyler Mailman (themailmaninbox@gmail.com)
