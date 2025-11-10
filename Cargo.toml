@@ -41,7 +41,7 @@ thiserror = "1.0"
 anyhow = "1.0"
 
 # Authentication
-jsonwebtoken = "9.2"
+jsonwebtoken = "10.2"
 argon2 = { version = "0.5", features = ["std"] }
 
 # Cryptography
